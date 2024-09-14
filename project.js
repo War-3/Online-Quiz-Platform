@@ -24,3 +24,11 @@ app.get('/', (req, res)=>{
 })
 
   app.use("/api", authRouter)
+
+
+
+
+  app.use((req, res)=>{
+    return res.status(200).json({message: "Sorry this endpoint does not exist."})
+
+})
