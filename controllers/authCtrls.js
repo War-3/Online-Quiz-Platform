@@ -224,11 +224,3 @@ exports.authFxn = async (req, res, next)=>{
     next()
   };
 
-
-//   module.exports = 
-//   {
-//     registerationFxn,
-//     loginFxn,
-//     authFxn,
-//     quizFxn,
-//   }

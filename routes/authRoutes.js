@@ -5,14 +5,14 @@ const {registerationFxn,
         authFxn,
         quizFxn,
         } = require('../controllers/authCtrls')
-const {validateRegistration,validateLogin, quizValidation}= require("../middleware/validationMiddleware")
+const {validateRegistration,validateLogin, validateQuiz}= require("../middleware/validationMiddleware")
 
 
 
 router.post('/registeration',validateRegistration, registerationFxn)
 router.post('/login', validateLogin, loginFxn)
 router.post("/auth",authFxn)
-router.post("/quiz", quizFxn)
+router.post("/quiz", validateQuiz, quizFxn)
 
 
 module.exports = router

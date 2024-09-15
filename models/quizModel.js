@@ -2,9 +2,9 @@ const mongoose = require('mongoose')
 
 const userIdSchema = new mongoose.Schema(
     {
-        firstName: {type: String},
-        lastName:{type: String},
-        state: {type: String}
+        firstName: {type: String, require: true},
+        lastName:{type: String, require: true},
+        state: {type: String,  require: true}
 })
 
 

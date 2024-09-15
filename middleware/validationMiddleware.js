@@ -54,11 +54,33 @@ const validateLogin = [
     }
 ]
 
+// Validate quiz
+const validateQuiz = [
+  
+  check('phoneNumber')
+    .notEmpty().withMessage('Phone Number is required'),
+
+    check('quizId')
+    .notEmpty().withMessage('quizID is required'),
+  
+  
+    (req, res, next) => {
+      const errors = validationResult(req);
+  
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+  
+      next();
+    }
+]
+
 
 
 module.exports = {
   validateRegistration,
   validateLogin,
+  validateQuiz
 }
     
     
