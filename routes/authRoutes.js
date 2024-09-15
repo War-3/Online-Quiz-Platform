@@ -1,14 +1,16 @@
 const express = require("express")
+const router = express.Router()
 const {registerationFxn,
         loginFxn,
         authFxn,
         quizFxn,
         } = require('../controllers/authCtrls')
+const {validateRegistration,validateLogin, quizValidation}= require("../middleware/validationMiddleware")
 
-const router = express.Router()
 
-router.post('/registeration',registerationFxn)
-router.post('/login',loginFxn)
+
+router.post('/registeration',validateRegistration, registerationFxn)
+router.post('/login', validateLogin, loginFxn)
 router.post("/auth",authFxn)
 router.post("/quiz", quizFxn)
 

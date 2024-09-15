@@ -4,41 +4,16 @@ const quizArray  = require ('../models/quizModel')
 const Users= require ('../models/UserRegModel')
 
 
-const validEmail = (email) => {
-  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return re.test(String(email).toLowerCase());
-}
-
-const registerationFxn = async (req, res, next)=>{
+exports.registerationFxn = async (req, res)=>{
     try {
         const {name, email, password, state, phoneNumber} = req.body
-        
-        const errors = []
-
-        if(!email){
-          errors.push("Please add your email")
-      } else if(!validEmail(email)){
-          errors.push("Email format is incorrect")
-      }
-
-  if(password.length < 8){
-      errors.push("Minimum of eight characters required for password.")
-  }
-
-  if(errors.length > 0){
-      return res.status(400).json({message: errors})
-  }
-
-    const exisitingUser = await Users.findOne({ email });
+      const exisitingUser = await Users.findOne({ email });
 
   if (exisitingUser) {
-    return res.status(400).json({ message: "Email already registered!" });
+    return res.status(400).json({ message: "User already registered!" });
   }
  
-
-
     const hashedpassword = await bcrypt.hash(password,8)
-
 
     const newUser = new Users ({ name, email, password: hashedpassword, state,phoneNumber});
    
@@ -52,33 +27,17 @@ const registerationFxn = async (req, res, next)=>{
     } catch (error) {
         return res.status(500).json({message: error.message})
     }
-    next()
+   
 };
 
 
 
 
-const loginFxn = async (req, res, next)=>{
+exports.loginFxn = async (req, res, next)=>{
     try {
       const {email, password} = req.body
       
-  const errors = []
-
-  if(!email){
-      errors.push("Please add your email")
-  } else if(!validEmail(email)){
-      errors.push("Email format is incorrect")
-  }
-
-  if(!password){
-      errors.push("Please add your password")
-  }
-
-  if(errors.length > 0){
-      return res.status(400).json({message: errors})
-  }
-
-  
+   
     const user = await Users.findOne({email});
    
     if(!user){
@@ -91,9 +50,6 @@ const loginFxn = async (req, res, next)=>{
     if(!paswdCheck){
         return res.status(400).json({message: "Incorrect Password or email"});
     }
-
-
-
 
     const accesstoken = jwt.sign({user},`${process.env.ACCESS_TOKEN}`,{expiresIn: "2m"})
 
@@ -113,33 +69,34 @@ const loginFxn = async (req, res, next)=>{
 };
 
 
-const authFxn = async (req, res, next)=>{
+exports.authFxn = async (req, res, next)=>{
     try {
-      const tk = req.header("Authorization")
+           
+        const tk = req.header("Authorization")
 
-      if(!tk){
-          return res.status(401).json({message: "Access Denied!"})
-      }
+        if(!tk){
+            return res.status(401).json({message: "Access Denied!"})
+        }
 
-      const tkk = tk.split(" ")
-  
-      const token = tkk[1]
-  
-      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN)
+        const tkk = tk.split(" ")
+    
+        const token = tkk[1]
+    
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN)
 
-      if(!decoded){
-          return res.status(401).json({message: "Invalid Login details"})
-      }
+        if(!decoded){
+            return res.status(401).json({message: "Invalid Login details"})
+        }
 
-      const user = await Users.findOne({email: decoded.user.email})
+        const user = await Users.findOne({email: decoded.user.email})
 
-      if(!user){
-          return res.status(404).json({message: "User account not found!"})
-      }
-  
-      req.user = user
+        if(!user){
+            return res.status(404).json({message: "User account not found!"})
+        }
+    
+        req.user = user
 
-      
+          
         return res.status(200).json({
             message: "Successful",
             user: req.user
@@ -152,87 +109,104 @@ const authFxn = async (req, res, next)=>{
   };
 
 
-  const quizFxn = async (req,res, next)=>{
+  exports.quizFxn = async (req,res, next)=>{
     
     try {
-        const { category, userId, quizId, quizAns} =req.body
-        const wans ="Incorrect!"
-  const rAns = "Correct!"
-  let totalcorrect = 0
+        const { userId, phoneNumber, category, quizId, quiz, quizAns} =req.body
 
- 
-  if(quizAns[0].ans =="A"){
-     quizAns[0].ans= rAns
-  }else{
-      quizAns[0].ans=wans
-  }   
-  
-  if(quizAns[1].ans =="D"){
-      quizAns[1].ans= rAns
-   }else{
-       quizAns[1].ans=wans
-   } 
-
-   if(quizAns[2].ans =="C"){
-      quizAns[2].ans= rAns
-   }else{
-       quizAns[2].ans=wans
-   } 
-
-   if(quizAns[3].ans =="A"){
-      quizAns[3].ans= rAns
-   }else{
-       quizAns[3].ans=wans
-   } 
-
-   if(quizAns[4].ans =="B"){
-      quizAns[4].ans= rAns
-   }else{
-       quizAns[4].ans=wans
-   } 
-
-   if(quizAns[5].ans =="C"){
-      quizAns[5].ans= rAns
-   }else{
-       quizAns[5].ans=wans
-   }  
-
-   if(quizAns[6].ans =="D"){
-      quizAns[6].ans= rAns
-   }else{
-       quizAns[6].ans=wans
-   } 
-  
-   if(quizAns[7].ans =="C"){
-      quizAns[7].ans= rAns
-   }else{
-       quizAns[7].ans=wans
-   } 
-
-   if(quizAns[8].ans =="C"){
-      quizAns[8].ans= rAns
-   }else{
-       quizAns[8].ans=wans
-   } 
-   if(quizAns[9].ans =="A"){
-      quizAns[9].ans= rAns
-   }else{
-       quizAns[9].ans=wans
-   } 
-   
-     
-        const exisitingUser = await quizArray.findOne({ userId });
+            const wans ="Incorrect!"
+            const rAns = "Correct!"
+           
+          
+           
+            if(quizAns[0].quizAns_1 =="A"){
+                quizAns[0].quizAns_1 = rAns
+            }else{
+                quizAns[0].quizAns_1=wans
+            }   
+            
+            if(quizAns[0].quizAns_2 =="D"){
+              quizAns[0].quizAns_2= rAns
+             }else{
+              quizAns[0].quizAns_2=wans
+             } 
+          
+             if(quizAns[0].quizAns_3 =="C"){
+              quizAns[0].quizAns_3= rAns
+             }else{
+              quizAns[0].quizAns_3=wans
+             } 
+          
+             if(quizAns[0].quizAns_4 =="A"){
+              quizAns[0].quizAns_4= rAns
+             }else{
+              quizAns[0].quizAns_4=wans
+             } 
+          
+             if(quizAns[0].quizAns_5 =="B"){
+              quizAns[0].quizAns_5= rAns
+             }else{
+              quizAns[0].quizAns_5=wans
+             } 
+          
+             if(quizAns[0].quizAns_6 =="C"){
+              quizAns[0].quizAns_6= rAns
+             }else{
+              quizAns[0].quizAns_6=wans
+             }  
+          
+             if(quizAns[0].quizAns_7 =="D"){
+              quizAns[0].quizAns_7= rAns
+             }else{
+              quizAns[0].quizAns_7=wans
+             } 
+            
+             if(quizAns[0].quizAns_8 =="C"){
+              quizAns[0].quizAns_8= rAns
+             }else{
+              quizAns[0].quizAns_8=wans
+             } 
+          
+             if(quizAns[0].quizAns_9 =="C"){
+              quizAns[0].quizAns_9= rAns
+             }else{
+              quizAns[0].quizAns_9=wans
+             } 
+             if(quizAns[0].quizAns_10 =="A"){
+              quizAns[0].quizAns_10= rAns
+             }else{
+              quizAns[0].quizAns_10=wans
+             } 
+             
+            
+       
+        const exisitingUser = await quizArray.findOne({ phoneNumber });
 
         if (exisitingUser) {
           return res.status(404).json({ message: "You have Submitted!" });
         }
 
-        const newUser = new quizArray ({ category, userId, quizId, quizAns})
+        const newUser = new quizArray ({ userId, phoneNumber, category, quizId, quiz, quizAns} )
     
         await newUser.save()
           
-        
-       const correctAns = quizAns.filter(item=>item.ans==="Correct!").length
+        const correctAns = quizAns.reduce((count, item) => {
+            const correctCount = [
+              item.quizAns_1,
+              item.quizAns_2,
+              item.quizAns_3,
+              item.quizAns_4,
+              item.quizAns_5,
+              item.quizAns_6,
+              item.quizAns_7,
+              item.quizAns_8,
+              item.quizAns_9,
+              item.quizAns_10
+            ].filter(answer => answer === "Correct!").length
+            return count + correctCount;
+        }, 0);
+            
+    //    const correctAns = quizAns.filter(item=>item.quizAns_1,==="Correct!").length
        let feedback = " "
        if(correctAns >=5){
         feedback ="Passed"
@@ -251,11 +225,10 @@ const authFxn = async (req, res, next)=>{
   };
 
 
-  module.exports = 
-  {
-    registerationFxn,
-    loginFxn,
-    authFxn,
-    quizFxn,
-    validEmail,
-  }
+//   module.exports = 
+//   {
+//     registerationFxn,
+//     loginFxn,
+//     authFxn,
+//     quizFxn,
+//   }
