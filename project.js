@@ -2,6 +2,7 @@ const express = require('express')
 const connectDB = require('./DateBase')
 const dotenv = require("dotenv").config()
 const authRouter = require('./routes/authRoutes')
+const cors = require('cors')
 
 
 
@@ -9,6 +10,7 @@ const app = express()
 
 
 app.use(express.json())
+app.use(cors())
 
 connectDB()
 const PORT = process.env.PORT || 7070

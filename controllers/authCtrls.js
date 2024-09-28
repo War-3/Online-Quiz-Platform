@@ -179,12 +179,20 @@ exports.authFxn = async (req, res, next)=>{
              } 
              
             
-       
+             const exisitingUserId = await quizArray.findOne({ "userId": {
+                $elemMatch: {  firstName: `${userId[0].firstName}` }
+              } });
+
+             if (exisitingUserId) {
+               return res.status(404).json({ message: "You have already Submitted!" });
+             }
+             
         const exisitingUser = await quizArray.findOne({ phoneNumber });
 
         if (exisitingUser) {
-          return res.status(404).json({ message: "You have Submitted!" });
+          return res.status(404).json({ message: "You have already Submitted!" });
         }
+        
 
         const newUser = new quizArray ({ userId, phoneNumber, category, quizId, quiz, quizAns} )
     
