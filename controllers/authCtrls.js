@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const bcrypt = require('bcrypt')
+const bcryptjs = require('bcryptjs')
 const quizArray  = require ('../models/quizModel')
 const Users= require ('../models/UserRegModel')
 
@@ -13,7 +13,7 @@ exports.registerationFxn = async (req, res)=>{
     return res.status(400).json({ message: "User already registered!" });
   }
  
-    const hashedpassword = await bcrypt.hash(password,8)
+    const hashedpassword = await bcryptjs.hash(password,8)
 
     const newUser = new Users ({ name, email, password: hashedpassword, state,phoneNumber});
    
@@ -46,7 +46,7 @@ exports.loginFxn = async (req, res, next)=>{
         });
     }
         
-    const paswdCheck = await bcrypt.compare(password, user.password)
+    const paswdCheck = await bcryptjs.compare(password, user.password)
     if(!paswdCheck){
         return res.status(400).json({message: "Incorrect Password or email"});
     }
