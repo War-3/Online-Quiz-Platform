@@ -1,10 +1,7 @@
 const express = require("express")
 const router = express.Router()
-const {registerationFxn,
-        loginFxn,
-        authFxn,
-        quizFxn,
-        } = require('../controllers/authCtrls')
+const {registerationFxn,loginFxn,authFxn} = require('../controllers/authCtrls')
+const  {quizFxn} = require('../controllers/quizCtrls')
 const {validateRegistration,validateLogin, validateQuiz}= require("../middleware/validationMiddleware")
 
 
