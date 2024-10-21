@@ -21,8 +21,12 @@ const userIdSchema = new mongoose.Schema(
                         C: String,
                         D: String
                         },
-            userAnswer: {  type: String, require: true }
-                    }]
+            userAnswer: {  type: String, require: true },
+            result: {
+                selectedOption: String,
+                message: String
+                    }
+                }]
                 
 });
 
