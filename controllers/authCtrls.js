@@ -5,7 +5,7 @@ const Users= require ('../models/UserRegModel')
 
 exports.registerationFxn = async (req, res)=>{
     try {
-        const {name, email, password, state, phoneNumber} = req.body
+        const {firstName,lastName, email, password} = req.body
       const exisitingUser = await Users.findOne({ email });
 
   if (exisitingUser) {
@@ -14,7 +14,7 @@ exports.registerationFxn = async (req, res)=>{
  
     const hashedpassword = await bcryptjs.hash(password,8)
 
-    const newUser = new Users ({ name, email, password: hashedpassword, state,phoneNumber});
+    const newUser = new Users ({ firstName,lastName, email, password: hashedpassword});
    
     await newUser.save()
     
@@ -50,7 +50,7 @@ exports.loginFxn = async (req, res, next)=>{
         return res.status(400).json({message: "Incorrect Password or email"});
     }
 
-    const accesstoken = jwt.sign({user},`${process.env.ACCESS_TOKEN}`,{expiresIn: "2m"})
+    const accesstoken = jwt.sign({user},`${process.env.ACCESS_TOKEN}`,{expiresIn: "10m"})
 
     const refreshtoken = jwt.sign({user},`${process.env.REFRESH_TOKEN}`,{expiresIn: "1d"})
     return res.status(200).json({
@@ -71,7 +71,8 @@ exports.loginFxn = async (req, res, next)=>{
 exports.authFxn = async (req, res, next)=>{
     try {
            
-        const tk = req.header("Authorization")
+        // const tk = req.header("Authorization")
+        const tk = req.headers.authorization
 
         if(!tk){
             return res.status(401).json({message: "Access Denied!"})
@@ -96,15 +97,16 @@ exports.authFxn = async (req, res, next)=>{
         req.user = user
 
           
-        return res.status(200).json({
-            message: "Successful",
-            user: req.user
-          })
+        // return res.status(200).json({
+        //     message: "Successful",
+        //     user: req.user
+        //   })
+        console.log("User authenticated:", req.user); // ✅ Debugging
+
+        next(); // ✅ Now properly moves to next middleware
     } catch (error) {
         return res.status(500).json({message: error.message});
     }
-
-    next()
   };
 
 

@@ -1,4 +1,5 @@
 const Quiz = require('../models/quizModel');
+const fetch = require("node-fetch");
 
 exports.quizFxn = async (req, res, next) => {
   try {
@@ -8,7 +9,7 @@ exports.quizFxn = async (req, res, next) => {
     const correctMsg = "Correct!";
     const correctAnswers = ['A', 'B', 'D', 'A', 'D', 'C', 'C', 'B', 'B', 'D'];
 
-    // Update each quiz item with the user's result
+    // Add result messages to each quiz item
     samplesQuiz.forEach((quiz, index) => {
       const isCorrect = quiz.userAnswer === correctAnswers[index];
       quiz.result = {
@@ -17,7 +18,7 @@ exports.quizFxn = async (req, res, next) => {
       };
     });
 
-    // Check if the user has already submitted using `userId` or `phoneNumber`
+    // Check if user already submitted
     const existingUserId = await Quiz.findOne({
       userId: { $elemMatch: { firstName: userId[0].firstName } },
     });
@@ -32,26 +33,46 @@ exports.quizFxn = async (req, res, next) => {
       return res.status(400).json({ message: "You have already submitted!" });
     }
 
-    // Save the new user and quiz submission
+    // Function to get address from coordinates
+    async function getAddressFromCoordinates(lat, lon) {
+      const accessKey = "205dd3a091641db4f39acb51f53a6982"; // Replace with your API key
+      const url = `https://api.positionstack.com/v1/reverse?access_key=${accessKey}&query=${lat},${lon}`;
+      
+      const response = await fetch(url);
+      const data = await response.json();
+  
+      if (data && data.data && data.data.length > 0) {
+        return data.data[0].label; // Full address
+      } else {
+        return "No address found for these coordinates.";
+      }
+    }
+
+    // Fetch address
+    const fullAddress = await getAddressFromCoordinates(6.6778, 3.1654);
+    console.log("Full Address:", fullAddress);
+
+    // Save the new quiz submission
     const newUser = new Quiz({ userId, phoneNumber, category, samplesQuiz });
     await newUser.save();
 
-    // Calculate the total number of correct answers
+    // Count correct answers
     const correctAns = samplesQuiz.filter(
       (item, index) => item.userAnswer === correctAnswers[index]
     ).length;
 
-    // Determine feedback based on score
+    // Feedback
     let feedback = correctAns >= 5 
       ? "Passed" 
       : "Failed! Sorry, you won't proceed to the next stage of the program.";
 
-    // Return the result
+    // Response
     return res.status(200).json({
       message: "You have completed your exam.",
       newUser,
       totalGrade: `${correctAns}/10`,
       feedback,
+      fullAddress
     });
 
   } catch (error) {

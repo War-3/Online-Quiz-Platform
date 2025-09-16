@@ -11,7 +11,7 @@ const {validateQuiz}= require("../middleware/quizValidation")
 router.post('/registeration',validateRegistration, registerationFxn)
 router.post('/login', validateLogin, loginFxn)
 router.post("/auth",authFxn)
-router.post("/quiz", validateQuiz, quizFxn)
+router.post("/quiz",  authFxn, validateQuiz, quizFxn)
 
 
 module.exports = router
